@@ -39,7 +39,7 @@ exports.handler = (event, context) => { //Amazon HQ passes us "event" which is a
                                 }
 
                                 case "GetPresident":{
-                                // Amazon HQ wants info about Congress
+                                // Amazon HQ wants info about the President
                                   context.succeed(
                                     generateResponse(
                                       buildSpeechletResponse("Trump is President.", true),
@@ -49,6 +49,61 @@ exports.handler = (event, context) => { //Amazon HQ passes us "event" which is a
                                   //this code just sends the string to Amazon HQ.  Notice it's the same format as the LaunchRequest.  This will always be the same, except obviously the string will be different
 
                                 break;
+                                }
+
+
+                                case "GetHouse":{
+                                  try{
+
+
+                                    deviceId = event.context.System.device.deviceId;
+                                    consentToken = event.context.System.user.permissions.consentToken
+                                    path = "/v1/devices/" + deviceId + "/settings/address";
+                                    request = getRequestOptions(path, consentToken);
+
+                                    Https.get(request, (response) => {
+                                      response.on('data', (data) => {
+                                        addressJSON  = JSON.parse(data); //when this is "let" then it results in error
+
+                                        state = addressJSON.stateOrRegion;
+                                        city = addressJSON.city +"%20";
+                                        addressLine1 = addressJSON.addressLine1;
+                                        zipCode = addressJSON.postalCode;
+
+                                        endpoint2 = "https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=" + addressLine1 +"&includeOffices=true&levels=country";
+
+
+                                        body = ""
+                                        Https.get(endpoint2, (response) => {
+                                          response.on('data', (chunk) => { body += chunk })
+                                          response.on('end', () => {
+                                            var namesJSON = JSON.parse(body);
+                                            var congressmanName = namesJSON.officials[4].name;
+                                            var congressmanParty = namesJSON.officials[4].party;
+                                            var districtNumber = namesJSON.officials[4].district;
+                                            var RepStatement = "Your Congressional representative's name is " + congressmanName +", and is of the " + congressmanParty + " party!  There are 435 representatives in the House of Representatives.";
+
+                                            context.succeed(
+                                              generateResponse(
+                                                buildSpeechletResponse(RepStatement, true),
+                                                {}
+                                              )
+                                            )
+                                          })
+                                        })
+
+
+                                      })
+                                    })
+
+                                  }
+                                  catch(err){
+
+                                    getLocationError(context)
+
+                                  }
+
+                                  break;
                                 }
 
 
