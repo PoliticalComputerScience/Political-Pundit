@@ -53,20 +53,25 @@ exports.handler = (event, context) => { //Amazon HQ passes us "event" which is a
 
 
                                 case "GetHouse":{
-                                  try{
+                                  try{ // We must TRY things just in case they fail!!
 
+                                    // The following 4 lines of code CAN ONLY WORK if the user of the skill has consented to giving us their location
+                                    // in the alexa app store
 
                                     deviceId = event.context.System.device.deviceId;
                                     consentToken = event.context.System.user.permissions.consentToken
                                     path = "/v1/devices/" + deviceId + "/settings/address";
                                     request = getRequestOptions(path, consentToken);
+                                    // Request is essentially a link (similar to Google API)
 
-                                    Https.get(request, (response) => {
+
+                                    Https.get(request, (response) => { // We are extracting data
                                       response.on('data', (data) => {
-                                        addressJSON  = JSON.parse(data); //when this is "let" then it results in error
+                                        addressJSON  = JSON.parse(data); // this converts the data into JSON (which is just easier for us to read)
+                                        // ADDRESSJSON IS AN OBJECT ON THE *USERS* LOCATION
 
                                         state = addressJSON.stateOrRegion;
-                                        city = addressJSON.city +"%20";
+                                        city = addressJSON.city // @ Glenn, check if this is really needed+"%20";
                                         addressLine1 = addressJSON.addressLine1;
                                         zipCode = addressJSON.postalCode;
 
@@ -97,7 +102,7 @@ exports.handler = (event, context) => { //Amazon HQ passes us "event" which is a
                                     })
 
                                   }
-                                  catch(err){
+                                  catch(err){ // We are catching error!!!
 
                                     getLocationError(context)
 
