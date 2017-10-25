@@ -173,6 +173,17 @@ exports.handler = (event, context) => {
         }
 
 
+        case "GetPro":
+        {
+          console.log('first');
+          const ppc = require('propublica-congress').create('Gcn3mmNmmpMX8p9XnnL9S03PM8DZT983u7HeV7cP');
+          console.log('second');
+
+ppc.getCurrentSenators('NY')
+  .then(results => console.log(results));
+
+          break;
+        }
 
 
         case "GetCongress":{
