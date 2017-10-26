@@ -166,21 +166,26 @@ exports.handler = (event, context) => {
           fred   = new Fred("2a90fe274878fbce8ae5660935beac8a");
 
           fred.getSeries({series_id: 'GNPCA'}, function(error, result) {
-    console.log(result)
-});
+            console.log(result)
+          });
 
           break;
         }
 
 
-        case "GetPro":
-        {
-          console.log('first');
-          const ppc = require('propublica-congress').create('Gcn3mmNmmpMX8p9XnnL9S03PM8DZT983u7HeV7cP');
-          console.log('second');
 
-ppc.getCurrentSenators('NY')
-  .then(results => console.log(results));
+        case 'GetNode':
+        {
+          //how to use ProPublica API: https://github.com/notioncollective/propublica-congress-node
+          var Congress = require( 'propublica-congress-node-master' );
+          var client = new Congress( "Gcn3mmNmmpMX8p9XnnL9S03PM8DZT983u7HeV7cP" );
+
+          client.memberLists({
+            congressNumber: '114',
+            chamber: 'house'
+          }).then(function(res) {
+            console.log(res);
+          });
 
           break;
         }
@@ -261,72 +266,72 @@ ppc.getCurrentSenators('NY')
             try{
 
 
-            deviceId = event.context.System.device.deviceId;
-            consentToken = event.context.System.user.permissions.consentToken
-            path = "/v1/devices/" + deviceId + "/settings/address";
-            request = getRequestOptions(path, consentToken);
+              deviceId = event.context.System.device.deviceId;
+              consentToken = event.context.System.user.permissions.consentToken
+              path = "/v1/devices/" + deviceId + "/settings/address";
+              request = getRequestOptions(path, consentToken);
 
-            Https.get(request, (response) => {
-              response.on('data', (data) => {
-                addressJSON  = JSON.parse(data); //when this is "let" then it results in error
+              Https.get(request, (response) => {
+                response.on('data', (data) => {
+                  addressJSON  = JSON.parse(data); //when this is "let" then it results in error
 
-                state = addressJSON.stateOrRegion;
-                city = addressJSON.city ;
-                addressLine1 = addressJSON.addressLine1;
-                zipCode = addressJSON.postalCode;
-
-
-                //var endpoint2 = "https://www.googleapis.com/civicinfo/v2/voterinfo?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=40%20Honey%20Locust%20Irvine%20CA&electionId=2000"
-                var endpoint2 = "https://www.googleapis.com/civicinfo/v2/voterinfo?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=" + addressLine1 +"%20"+ city +"%20"+ state+"&electionId=2000";
+                  state = addressJSON.stateOrRegion;
+                  city = addressJSON.city ;
+                  addressLine1 = addressJSON.addressLine1;
+                  zipCode = addressJSON.postalCode;
 
 
-                body = ""
-                Https.get(endpoint2, (response) => {
-                  response.on('data', (chunk) => { body += chunk })
-                  response.on('end', () => {
-                    var namesJSON = JSON.parse(body);
-
-                    var addressLinePoll = namesJSON.pollingLocations[0].address.line1;
-                    var cityPoll = namesJSON.pollingLocations[0].address.city;
-                    var statePoll = stateNameJSON[namesJSON.pollingLocations[0].address.state];
-                    var zipPoll = namesJSON.pollingLocations[0].address.zip;
-                    var from = addressLine1 + "," + city + "," + state;
-
-                    var to = addressLinePoll+ "," + cityPoll+ "," +statePoll;
-
-                    var endpoint3 = "https://www.mapquestapi.com/directions/v2/route?key=Eo2y0fnG8rFOL2LNtxzlq6KMEC4pwP04&from="+ from+ "&to=" + to + "&routeType=fastest"
-                    //var endpoint3= "https://www.mapquestapi.com/directions/v2/route?key=Eo2y0fnG8rFOL2LNtxzlq6KMEC4pwP04&from=40 Honey Locust,Irvine,CA&to=1 Civic Center Plz,Irvine,CA&routeType=fastest"
-                    //var endpoint3 ="https://www.mapquestapi.com/directions/v2/route?key=Eo2y0fnG8rFOL2LNtxzlq6KMEC4pwP04&from=2425 Blake Street,Berkeley,CA&to=40 Honey Locust,Irvine,CA&routeType=fastest" //DON'T FORGET THE S IN HTTPS LMAOOO
-                    var  secondBody=""
-                    Https.get(endpoint3, (response) => {
-                      response.on('data', (chunk1) => { secondBody += chunk1 }     )
-                      response.on('end', () => {
-                        var mapquestAPI = JSON.parse(secondBody)
-
-                        var time = mapquestAPI.route.realTime;
-                        var minuteConversion = Math.trunc((parseInt(time)/60))
+                  //var endpoint2 = "https://www.googleapis.com/civicinfo/v2/voterinfo?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=40%20Honey%20Locust%20Irvine%20CA&electionId=2000"
+                  var endpoint2 = "https://www.googleapis.com/civicinfo/v2/voterinfo?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=" + addressLine1 +"%20"+ city +"%20"+ state+"&electionId=2000";
 
 
-                        context.succeed(
-                          generateResponse(
-                            buildSpeechletResponse("Your designated polling precinct is located at: " + addressLinePoll + " in " + cityPoll + ", " + statePoll + ".  The precinct is only a " + minuteConversion+ " minute drive away from your house!", true),
-                            {}
+                  body = ""
+                  Https.get(endpoint2, (response) => {
+                    response.on('data', (chunk) => { body += chunk })
+                    response.on('end', () => {
+                      var namesJSON = JSON.parse(body);
+
+                      var addressLinePoll = namesJSON.pollingLocations[0].address.line1;
+                      var cityPoll = namesJSON.pollingLocations[0].address.city;
+                      var statePoll = stateNameJSON[namesJSON.pollingLocations[0].address.state];
+                      var zipPoll = namesJSON.pollingLocations[0].address.zip;
+                      var from = addressLine1 + "," + city + "," + state;
+
+                      var to = addressLinePoll+ "," + cityPoll+ "," +statePoll;
+
+                      var endpoint3 = "https://www.mapquestapi.com/directions/v2/route?key=Eo2y0fnG8rFOL2LNtxzlq6KMEC4pwP04&from="+ from+ "&to=" + to + "&routeType=fastest"
+                      //var endpoint3= "https://www.mapquestapi.com/directions/v2/route?key=Eo2y0fnG8rFOL2LNtxzlq6KMEC4pwP04&from=40 Honey Locust,Irvine,CA&to=1 Civic Center Plz,Irvine,CA&routeType=fastest"
+                      //var endpoint3 ="https://www.mapquestapi.com/directions/v2/route?key=Eo2y0fnG8rFOL2LNtxzlq6KMEC4pwP04&from=2425 Blake Street,Berkeley,CA&to=40 Honey Locust,Irvine,CA&routeType=fastest" //DON'T FORGET THE S IN HTTPS LMAOOO
+                      var  secondBody=""
+                      Https.get(endpoint3, (response) => {
+                        response.on('data', (chunk1) => { secondBody += chunk1 }     )
+                        response.on('end', () => {
+                          var mapquestAPI = JSON.parse(secondBody)
+
+                          var time = mapquestAPI.route.realTime;
+                          var minuteConversion = Math.trunc((parseInt(time)/60))
+
+
+                          context.succeed(
+                            generateResponse(
+                              buildSpeechletResponse("Your designated polling precinct is located at: " + addressLinePoll + " in " + cityPoll + ", " + statePoll + ".  The precinct is only a " + minuteConversion+ " minute drive away from your house!", true),
+                              {}
+                            )
                           )
-                        )
+                        })
                       })
                     })
                   })
                 })
               })
-            })
 
 
-          }
-          catch(err){
+            }
+            catch(err){
 
-            getLocationError(context)
+              getLocationError(context)
 
-          }
+            }
             break;
 
           }
@@ -558,30 +563,30 @@ ppc.getCurrentSenators('NY')
           }
 
           case "SessionEndedRequest":{
-          // Session Ended Request
+            // Session Ended Request
 
-          context.succeed(
-            generateResponse(
-              buildSpeechletResponse("Thanks for using me.  See you later!", true),
-              {}
+            context.succeed(
+              generateResponse(
+                buildSpeechletResponse("Thanks for using me.  See you later!", true),
+                {}
+              )
             )
-          )
-          console.log(`SESSION ENDED REQUEST`)
+            console.log(`SESSION ENDED REQUEST`)
 
-          break;
-        }
+            break;
+          }
 
-        case "GetHelp":{
-          context.succeed(
-            generateResponse(
-              buildSpeechletResponse("You can ask me about things pertaining to the United States government and economy.  For example, you can ask 'who represents me in congress?' or 'how large is the US national debt?'  Now, what would you  like to know?", false),
-              {}
+          case "GetHelp":{
+            context.succeed(
+              generateResponse(
+                buildSpeechletResponse("You can ask me about things pertaining to the United States government and economy.  For example, you can ask 'who represents me in congress?' or 'how large is the US national debt?'  Now, what would you  like to know?", false),
+                {}
+              )
             )
-          )
 
 
-          break;
-        }
+            break;
+          }
 
 
 

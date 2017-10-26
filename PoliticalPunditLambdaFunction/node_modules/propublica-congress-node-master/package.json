@@ -1,0 +1,31 @@
+{
+  "name": "propublica-congress-node",
+  "version": "0.1.2",
+  "description": "Client lib for ProPublica Congress API (formerly NYT)",
+  "main": "./src",
+  "author": "",
+  "contributors": [
+    {
+      "name": "Jonathan Wohl",
+      "url": "https://github.com/jmwohl"
+    },
+    {
+      "name": "Andrew Dayton",
+      "url": "https://github.com/andyinabox"
+    }
+  ],
+  "scripts": {
+    "test": "mocha test/test.js -R spec"
+  },
+  "repository": "https://github.com/notioncollective/propublica-congress-node",
+  "license": "MIT",
+  "dependencies": {
+    "request": "^2.39.0"
+  },
+  "devDependencies": {
+    "rewire": "^2.1.0",
+    "chai": "^1.9.1",
+    "sinon": "^1.10.3",
+    "sinon-chai": "^2.5.0"
+  }
+}
