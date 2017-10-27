@@ -11,6 +11,7 @@ exports.handler = (event, context) => { //Amazon HQ passes us "event" which is a
     
     case "LaunchRequest":
     //We are introducing ourselves.  This is called a LaunchRequest
+    //comment
                 context.succeed(
                   generateResponse(
                     buildSpeechletResponse("Welcome to political pundit.  Feel free to ask me questions about the United States Government!", false),
@@ -41,7 +42,7 @@ exports.handler = (event, context) => { //Amazon HQ passes us "event" which is a
         var website = namesJSON.officials[4].urls;
         
        
-        var webStatement = congressmanName + "'s website is " + website;
+        var webStatement = congressmanName + "'s wbsite is " + website;
         
         var RepStatement = webStatement;
 
@@ -56,6 +57,7 @@ exports.handler = (event, context) => { //Amazon HQ passes us "event" which is a
     })
     break;
     }
+
     
     case "socialMedia":{
 
