@@ -159,15 +159,16 @@ exports.handler = (event, context) => {
 
           case "GetNYT":{
             // var url = "https://api.nytimes.com/svc/topstories/v2/politics.json?api-key=80c203fa7d394f7eb35de7b3a96c31db";
+            if(events.request.intent.)
             var request = require('request');
          request('https://api.nytimes.com/svc/topstories/v2/politics.json?api-key=80c203fa7d394f7eb35de7b3a96c31db', function (error, response, body) {
- var nytimesJSON = JSON.parse(body)
- var results = nytimesJSON.results
- var statement = "Here are the top three political headlines of today: "
+ var nytimesJSON = JSON.parse(body);
+ var results = nytimesJSON.results;
+ var statement = "Here are the top three political headlines of today: ";
  for (i = 0; i <= 2; i++) {
    statement += (i + 1) + ". " + results[i].title + ". Abstract: " + results[i].abstract +" ";
  }
-
+ console.log(event.request.intent.slots.name);
  context.succeed(
    generateResponse(
      buildSpeechletResponse(statement, true),
@@ -178,7 +179,27 @@ exports.handler = (event, context) => {
             break;
           }
 
+          case 'GetMissedVotes':
+                  {
+                    //how to use ProPublica API: https://github.com/notioncollective/propublica-congress-node
+                    var Congress = require( 'propublica-congress-node-master' );
+                    var client = new Congress( "Gcn3mmNmmpMX8p9XnnL9S03PM8DZT983u7HeV7cP" );
 
+                    client.memberLists({
+                      congressNumber: '114',
+                      chamber: 'house'
+                    }).then(function(res) {
+
+                      context.succeed(
+                        generateResponse(
+                          buildSpeechletResponse("Your congressman was present at Congress "+ res.results[0].members[1].missed_votes_pct+ "percent of the time.", true),
+                          {}
+                        )
+                      )
+                      console.log(res);
+                    });
+                    break;
+                  }
 
 
         case "GetGDP":{
