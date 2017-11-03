@@ -157,6 +157,28 @@ exports.handler = (event, context) => {
           break;
         }
 
+          case "GetNYT":{
+            // var url = "https://api.nytimes.com/svc/topstories/v2/politics.json?api-key=80c203fa7d394f7eb35de7b3a96c31db";
+            var request = require('request');
+         request('https://api.nytimes.com/svc/topstories/v2/politics.json?api-key=80c203fa7d394f7eb35de7b3a96c31db', function (error, response, body) {
+ var nytimesJSON = JSON.parse(body)
+ var results = nytimesJSON.results
+ var statement = "Here are the top three political headlines of today: "
+ for (i = 0; i <= 2; i++) {
+   statement += (i + 1) + ". " + results[i].title + ". Abstract: " + results[i].abstract +" ";
+ }
+
+ context.succeed(
+   generateResponse(
+     buildSpeechletResponse(statement, true),
+     {}
+   )
+ )
+});
+            break;
+          }
+
+
 
 
         case "GetGDP":{
@@ -174,7 +196,7 @@ exports.handler = (event, context) => {
 
 
 
-        case 'GetMissedVotes':
+        case 'GetNode':
         {
           //how to use ProPublica API: https://github.com/notioncollective/propublica-congress-node
           var Congress = require( 'propublica-congress-node-master' );
@@ -184,31 +206,8 @@ exports.handler = (event, context) => {
             congressNumber: '114',
             chamber: 'house'
           }).then(function(res) {
-
-            context.succeed(
-              generateResponse(
-                buildSpeechletResponse("Your congressman was present at Congress "+ res.results[0].members[1].missed_votes_pct+ "percent of the time.", true),
-                {}
-              )
-            )
             console.log(res);
           });
-          break;
-        }
-
-        case "GetNYT":{
-          var request = require('request');
-          request('https://api.nytimes.com/svc/topstories/v2/politics.json?api-key=80c203fa7d394f7eb35de7b3a96c31db', function (error, response, body) {
-  console.log('error:', error); // Print the error if one occurred
-  console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-  console.log('body:', body); // Print the HTML for the Google homepage.
-  context.succeed(
-    generateResponse(
-      buildSpeechletResponse(response, true),
-      {}
-    )
-  )
-});
 
           break;
         }
