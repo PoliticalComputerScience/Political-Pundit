@@ -156,7 +156,7 @@ exports.handler = (event, context) => {
 
           break;
         }
-
+          /*
           case "GetNYT":{
             // var url = "https://api.nytimes.com/svc/topstories/v2/politics.json?api-key=80c203fa7d394f7eb35de7b3a96c31db";
             if(events.request.intent.)
@@ -177,7 +177,7 @@ exports.handler = (event, context) => {
  )
 });
             break;
-          }
+          }*/
 
           case 'GetMissedVotes':
                   {
@@ -200,6 +200,31 @@ exports.handler = (event, context) => {
                     });
                     break;
                   }
+
+          case 'educationBills':
+        {
+          //how to use ProPublica API: https://github.com/notioncollective/propublica-congress-node
+          var Congress = require( 'propublica-congress-node-master' );
+          var client = new Congress( "Gcn3mmNmmpMX8p9XnnL9S03PM8DZT983u7HeV7cP" );
+
+          client.billsRecent({
+            congressNumber: '114',
+            chamber: 'house',
+            billType: 'updated'
+          }).then(function(res) {
+
+          //var actionDate = ;
+
+            context.succeed(
+              generateResponse(
+                buildSpeechletResponse("The most recent bill is "+ res.results[0].bills[0].short_title, true),
+                {}
+              )
+            )
+            console.log(res);
+          });
+          break;
+        }
 
 
         case "GetGDP":{
