@@ -156,28 +156,184 @@ exports.handler = (event, context) => {
 
           break;
         }
-          /*
-          case "GetNYT":{
-            // var url = "https://api.nytimes.com/svc/topstories/v2/politics.json?api-key=80c203fa7d394f7eb35de7b3a96c31db";
-            if(events.request.intent.)
+
+        case "GetNYT":{
+          // var url = "https://api.nytimes.com/svc/topstories/v2/politics.json?api-key=80c203fa7d394f7eb35de7b3a96c31db";
+          var request = require('request');
+          var names = event.request.intent.slots.Name;
+          if(names.value != undefined) {
+            request('https://api.nytimes.com/svc/topstories/v2/politics.json?api-key=80c203fa7d394f7eb35de7b3a96c31db', function (error, response, body) {
+            var nytimesJSON = JSON.parse(body);
+            var results = nytimesJSON.results;
+            var value = names.value.toLowerCase();
+            var statement = "Here are the top political headlines about " + value + ": ";
+            var count = 1;
+              for (i = 0; i < results.length; i++) {
+                if (count > 3) {
+                  break;
+                }
+                var contains = false;
+                var des_facet = results[i].des_facet;
+                var per_facet = results[i].per_facet;
+                for (d = 0; d < des_facet.length; d++) {
+                  if (des_facet[d] != undefined && des_facet[d].toLowerCase().includes(value)) {
+                    contains = true;
+                  }
+                }
+                for (p = 0; p < per_facet.length; p++) {
+                  if (per_facet[p] != undefined && per_facet[p].toLowerCase().includes(value)) {
+                    contains = true;
+                  }
+                }
+                if (contains && results[i].subsection == "Politics") {
+                  statement += count + ". " + results[i].title + ". Abstract: " + results[i].abstract + " ";
+                  count += 1;
+                }
+              }
+              if (count == 1) {
+                statement = "Sorry, I couldn't find any articles about " + value + ".";
+                context.succeed(
+                  generateResponse(
+                  buildSpeechletResponse(statement, true),
+                  {}
+                )
+              )
+              }
+            context.succeed(
+              generateResponse(
+              buildSpeechletResponse(statement, true),
+              {}
+            )
+          )
+        });
+          }
+          else {
+          request('https://api.nytimes.com/svc/topstories/v2/politics.json?api-key=80c203fa7d394f7eb35de7b3a96c31db', function (error, response, body) {
+          var nytimesJSON = JSON.parse(body);
+          var results = nytimesJSON.results;
+          var statement = "Here are the top three political headlines of today: ";
+          for (i = 0; i <= 2; i++) {
+            statement += (i + 1) + ". " + results[i].title + ". Abstract: " + results[i].abstract + " ";
+          }
+          context.succeed(
+            generateResponse(
+            buildSpeechletResponse(statement, true),
+            {}
+          )
+        )
+      });
+      }
+      break;
+    }
+
+    case 'GetBio':{
+        deviceId = event.context.System.device.deviceId;
+        consentToken = event.context.System.user.permissions.consentToken
+        path = "/v1/devices/" + deviceId + "/settings/address";
+        request = getRequestOptions(path, consentToken);
+
+        Https.get(request, (response) => {
+          response.on('data', (data) => {
+            addressJSON  = JSON.parse(data); //when this is "let" then it results in error
+
+            state = addressJSON.stateOrRegion;
+            city = addressJSON.city +"%20";
+            addressLine1 = addressJSON.addressLine1;
+            zipCode = addressJSON.postalCode;
+            console.log("2")
+            endpoint2 = "https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=" + addressLine1 +"&includeOffices=true&levels=country";
             var request = require('request');
-         request('https://api.nytimes.com/svc/topstories/v2/politics.json?api-key=80c203fa7d394f7eb35de7b3a96c31db', function (error, response, body) {
- var nytimesJSON = JSON.parse(body);
- var results = nytimesJSON.results;
- var statement = "Here are the top three political headlines of today: ";
- for (i = 0; i <= 2; i++) {
-   statement += (i + 1) + ". " + results[i].title + ". Abstract: " + results[i].abstract +" ";
- }
- console.log(event.request.intent.slots.name);
- context.succeed(
-   generateResponse(
-     buildSpeechletResponse(statement, true),
-     {}
-   )
- )
-});
-            break;
-          }*/
+            request(endpoint2, function (error, response, body) {
+                var namesJSON = JSON.parse(body);
+                var reptype = event.request.intent.slots.RepType.value;
+                if (reptype != undefined) {
+                  var type = reptype.toLowerCase();
+                  var name;
+                  var name1;
+                  if (type == "president") {
+                      name = namesJSON.officials[0].name;
+                  }
+                  else if (type == "vice president") {
+                      name = namesJSON.officials[1].name;
+                  }
+                  else if (type == "senator" || type == "senators") {
+                      name = namesJSON.officials[2].name;
+                      name1 = namesJSON.officials[3].name;
+                  }
+                  else if (type == "representative" || type == "congressional representative") {
+                      name = namesJSON.officials[4].name;
+                  }
+                  //https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=Donald_J._Trump&redirects=1
+                  var namesplit = name.split(" ");
+                  var firstname;
+                  var lastname;
+                  if (namesplit.length == 2) {
+                      firstname = namesplit[0];
+                      lastname = namesplit[1];
+                  }
+                  else if (namesplit.length == 3) {
+                      firstname = namesplit[0];
+                      lastname = namesplit[2];
+                  }
+                  var title = firstname + "_" + lastname;
+                  var wiki = "https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=" + title + "&redirects=1"
+                  if (type == "senator" || type == "senators") {
+                      var namesplit1 = name1.split(" ");
+                      var firstname1;
+                      var lastname1;
+                      if (namesplit1.length == 2) {
+                          firstname1 = namesplit1[0];
+                          lastname1 = namesplit1[1];
+                      }
+                      else if (namesplit1.length == 3) {
+                          firstname1 = namesplit1[0];
+                          lastname1 = namesplit1[2];
+                      }
+                      var title1 = firstname1 + "_" + lastname1;
+                      var wiki1 = "https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=" + title + "|" + title1 + "&redirects=1"
+                      request(wiki1, function (error, response, body) {
+                      var wikiJSON = JSON.parse(body);
+                      var pages = wikiJSON.query.pages
+                      var page = pages[Object.keys(pages)[0]]
+                      var page1 = pages[Object.keys(pages)[1]]
+                      var extract = page.extract
+                      var extract1 = page1.extract
+                      var statement = "Your senators are " + name + " and " + name1 + ". " + extract + " " + extract1;
+                      context.succeed(
+                        generateResponse(
+                        buildSpeechletResponse(statement, true),
+                        {}
+                      )
+                    )
+                  })
+                  }
+                  else {
+                    request(wiki, function (error, response, body) {
+                    var wikiJSON = JSON.parse(body);
+                    var pages = wikiJSON.query.pages
+                    var page = pages[Object.keys(pages)[0]]
+                    var extract = page.extract
+                    // for (var i in pages) {
+                    //   console.log(i)
+                    //   console.log(wikiJSON.query.pages.i.extract)
+                    //   extract = wikiJSON.query.pages.i.extract
+                    // }
+                    var statement = "Your " + type + " is " + name + ". " + extract;
+                    context.succeed(
+                      generateResponse(
+                      buildSpeechletResponse(statement, true),
+                      {}
+                    )
+                  )
+                })
+                  }
+                }
+
+              })
+            })
+        })
+          break;
+    }
 
           case 'GetMissedVotes':
                   {
