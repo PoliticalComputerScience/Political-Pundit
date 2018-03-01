@@ -363,8 +363,8 @@ exports.handler = (event, context) => {
           var Congress = require( 'propublica-congress-node-master' );
           var client = new Congress( "Gcn3mmNmmpMX8p9XnnL9S03PM8DZT983u7HeV7cP" );
 
-          client.billsRecent({
-            congressNumber: '114',
+          client.billsSubjects({
+            congressNumber: '115',
             chamber: 'house',
             billType: 'updated'
           }).then(function(res) {
@@ -395,6 +395,209 @@ exports.handler = (event, context) => {
 
           break;
         }
+
+
+
+case "GetCongressAddress":{
+
+    google_API_Link = "https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=" + "19855AnnenbergAshburn" +"&includeOffices=true&levels=country";
+    //CHANGE THIS LINK to include your OWN address (aka switch out 40HoneyLocustIrvine for your address)
+
+    body = "";                                            //DON'T TOUCH
+    Https.get(google_API_Link, (response) => {           //DON'T TOUCH
+      response.on('data', (chunk) => { body += chunk });  //DON'T TOUCH
+      response.on('end', () => {                         //DON'T TOUCH
+        var namesJSON = JSON.parse(body);                //DON'T TOUCH.
+            //Think of namesJSON as an OBJECT that has a bunch of data in it.  It's basically a bunch of nested dictionaries and arrays.  Access it as such (using "[]" and .)
+        var congressmanName = namesJSON.officials[4].name;
+        var congressmanParty = namesJSON.officials[4].party;
+        var districtNumber = namesJSON.officials[4].district;
+        var congressmanStreet = namesJSON.officials[4].address[0].line1;
+        var congressmanCity = namesJSON.officials[4].address[0].city;
+        var congressmanState = namesJSON.officials[4].address[0].state;
+        var congressmanZip = namesJSON.officials[4].address[0].zip;
+        var congressmanAddress = congressmanStreet + " " + congressmanCity + " " + congressmanState + " " + congressmanZip;
+
+        var RepStatement = "Your Congressional representative's name is " + congressmanName +" from the "+ congressmanParty +" party, Their office is located at " + congressmanAddress ;
+
+
+        context.succeed(
+          generateResponse(
+            buildSpeechletResponse(RepStatement, true),
+            {}
+          )
+        );
+      });
+    });
+    break;
+    }
+
+
+
+case "GetCongressFacebookPage":{
+
+    google_API_Link = "https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=" + "19855AnnenbergAshburn" +"&includeOffices=true&levels=country";
+    //CHANGE THIS LINK to include your OWN address (aka switch out 40HoneyLocustIrvine for your address)
+
+    body = "";                                            //DON'T TOUCH
+    Https.get(google_API_Link, (response) => {           //DON'T TOUCH
+      response.on('data', (chunk) => { body += chunk });  //DON'T TOUCH
+      response.on('end', () => {                         //DON'T TOUCH
+        var namesJSON = JSON.parse(body);                //DON'T TOUCH.
+            //Think of namesJSON as an OBJECT that has a bunch of data in it.  It's basically a bunch of nested dictionaries and arrays.  Access it as such (using "[]" and .)
+        var congressmanName = namesJSON.officials[4].name;
+        var congressmanParty = namesJSON.officials[4].party;
+
+        var hasAccount = false;
+        var socialData = namesJSON.officials[4].channels;
+        var RepStatement = "";
+        for (i = 0; i < socialData.length; i++){
+            if (socialData[i].type == "Facebook"){
+                 RepStatement = "Your Congressional representative's name is " + congressmanName +" from the "+ congressmanParty +"party, their Facebook page is " + socialData[i].id;
+                hasAccount = true;
+                break;
+            }
+        }
+        if (!hasAccount){
+          RepStatement = "Your Congressional representative's name is " + congressmanName +" from the "+ congressmanParty +"party, they do not have a Facebook Page.";
+        }
+
+
+        context.succeed(
+          generateResponse(
+            buildSpeechletResponse(RepStatement, true),
+            {}
+          )
+        );
+      });
+    });
+    break;
+    }
+
+    case "GetCongressGooglePlus":{
+
+    google_API_Link = "https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=" + "19855AnnenbergAshburn" +"&includeOffices=true&levels=country";
+    //CHANGE THIS LINK to include your OWN address (aka switch out 40HoneyLocustIrvine for your address)
+
+    body = "";                                         //DON'T TOUCH
+    Https.get(google_API_Link, (response) => {           //DON'T TOUCH
+      response.on('data', (chunk) => { body += chunk });  //DON'T TOUCH
+      response.on('end', () => {                         //DON'T TOUCH
+        var namesJSON = JSON.parse(body);                //DON'T TOUCH.
+            //Think of namesJSON as an OBJECT that has a bunch of data in it.  It's basically a bunch of nested dictionaries and arrays.  Access it as such (using "[]" and .)
+        var congressmanName = namesJSON.officials[4].name;
+        var congressmanParty = namesJSON.officials[4].party;
+
+        var hasAccount = false;
+        var socialData = namesJSON.officials[4].channels;
+        var RepStatement = "";
+        for (i = 0; i < socialData.length; i++){
+            if (socialData[i].type == "GooglePlus"){
+                 RepStatement = "Your Congressional representative's name is " + congressmanName +" from the "+ congressmanParty +"party, their GooglePlus account is " + socialData[i].id;
+                hasAccount = true;
+                break;
+            }
+        }
+        if (!hasAccount){
+          RepStatement = "Your Congressional representative's name is " + congressmanName +" from the "+ congressmanParty +"party, they do not have a GooglePlus Account.";
+        }
+
+
+        context.succeed(
+          generateResponse(
+            buildSpeechletResponse(RepStatement, true),
+            {}
+          )
+        );
+      });
+    });
+    break;
+    }
+
+
+       case "GetCongressTwitter":{
+
+       google_API_Link = "https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=" + "19855AnnenbergAshburn" +"&includeOffices=true&levels=country";
+       //CHANGE THIS LINK to include your OWN address (aka switch out 40HoneyLocustIrvine for your address)
+
+       body = "";                                            //DON'T TOUCH
+       Https.get(google_API_Link, (response) => {           //DON'T TOUCH
+         response.on('data', (chunk) => { body += chunk });  //DON'T TOUCH
+         response.on('end', () => {                         //DON'T TOUCH
+           var namesJSON = JSON.parse(body);                //DON'T TOUCH.
+               //Think of namesJSON as an OBJECT that has a bunch of data in it.  It's basically a bunch of nested dictionaries and arrays.  Access it as such (using "[]" and .)
+           var congressmanName = namesJSON.officials[4].name;
+           var congressmanParty = namesJSON.officials[4].party;
+
+           var hasAccount = false;
+           var socialData = namesJSON.officials[4].channels;
+           RepStatement = "";
+           for (i = 0; i < socialData.length; i++){
+               if (socialData[i].type == "Twitter"){
+                   RepStatement = "Your Congressional representative's name is " + congressmanName +" from the "+ congressmanParty +"party, their Twitter account is " + socialData[i].id;
+                   hasAccount = true;
+                   break;
+               }
+           }
+           if (!hasAccount){
+             RepStatement = "Your Congressional representative's name is " + congressmanName +" from the "+ congressmanParty +"party, they do not have a Twitter Account.";
+           }
+
+
+           context.succeed(
+             generateResponse(
+               buildSpeechletResponse(RepStatement, true),
+               {}
+             )
+           );
+         });
+       });
+       break;
+       }
+
+
+       case "GetCustomCongressmanPhoneNumber":{
+
+
+           var Congress = require( 'propublica-congress-node-master' );
+                     var client = new Congress( "Gcn3mmNmmpMX8p9XnnL9S03PM8DZT983u7HeV7cP" );
+
+                     client.memberLists({
+                       congressNumber: '114',
+                       chamber: 'house'
+                     }).then(function(res) {
+                       console.log(res);
+                     });
+
+           var congressList = res.results[0].members;
+           var congressLastName = event.request.intent.slots.value;
+           var congressman = null;
+
+           for(i = 0; i < congressList.length; i++){
+             if (congressList[i].last_name == congressLastName){
+               congressman = congressList[i];
+             }
+           }
+
+           var RepStatement = "";
+           if (congressman == null){
+             RepStatement = "We could not find information on this congressman.";
+           } else {
+             var congressmanPhone = congressman.phone;
+             var congressmanParty = congressman.party;
+             RepStatement = "The phone number of" + congressLastName +" from the "+ congressmanParty +" party is " + congressmanPhone ;
+           }
+
+
+           context.succeed(
+             generateResponse(
+               buildSpeechletResponse(RepStatement, true),
+               {}
+             )
+           );
+       break;
+       }
+
 
 
 
