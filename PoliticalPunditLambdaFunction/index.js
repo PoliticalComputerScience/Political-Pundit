@@ -117,11 +117,11 @@ exports.handler = (event, context) => {
                 addressJSON  = JSON.parse(data); //when this is "let" then it results in error
 
                 state = addressJSON.stateOrRegion;
-                city = addressJSON.city +"%20";
+                city = addressJSON.city;
                 addressLine1 = addressJSON.addressLine1;
                 zipCode = addressJSON.postalCode;
 
-                endpoint2 = "https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=" + addressLine1 +"&includeOffices=true&levels=country";
+                endpoint2 = "https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=" + addressLine1 +"%20"+ city +"&includeOffices=true&levels=country";
 
 
                 body = ""
@@ -159,6 +159,7 @@ exports.handler = (event, context) => {
 
         case "GetNYT":{
           // var url = "https://api.nytimes.com/svc/topstories/v2/politics.json?api-key=80c203fa7d394f7eb35de7b3a96c31db";
+try{
           var request = require('request');
           var names = event.request.intent.slots.Name;
           if(names.value != undefined) {
@@ -223,6 +224,12 @@ exports.handler = (event, context) => {
               )
             });
           }
+        }
+        catch(err){
+
+      getLocationError(context)
+
+    }
           break;
         }
 
@@ -399,7 +406,7 @@ exports.handler = (event, context) => {
 
 
         case "GetCongressAddress":{
-
+try{
           google_API_Link = "https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=19855%20Annenberg%20Ashburn&includeOffices=true&levels=country";
           //CHANGE THIS LINK to include your OWN address (aka switch out 40HoneyLocustIrvine for your address)
 
@@ -429,13 +436,19 @@ exports.handler = (event, context) => {
           );
         });
       });
+    }
+    catch(err){
+
+      getLocationError(context)
+
+    }
       break;
     }
 
 
 
     case "GetCongressFacebookPage":{
-
+try{
       google_API_Link = "https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=19855%20Annenberg%20Ashburn&includeOffices=true&levels=country";
       //CHANGE THIS LINK to include your OWN address (aka switch out 40HoneyLocustIrvine for your address)
 
@@ -471,12 +484,18 @@ exports.handler = (event, context) => {
       );
     });
   });
+}
+catch(err){
+
+      getLocationError(context)
+
+    }
 
   break;
 }
 
 case "GetCongressGooglePlus":{
-
+try{
   google_API_Link = "https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=19855%20Annenberg%20Ashburn&includeOffices=true&levels=country";
   //CHANGE THIS LINK to include your OWN address (aka switch out 40HoneyLocustIrvine for your address)
 
@@ -512,12 +531,18 @@ case "GetCongressGooglePlus":{
   );
 });
 });
+}
+catch(err){
+
+      getLocationError(context)
+
+    }
 break;
 }
 
 
 case "GetCongressTwitter":{
-
+try{
   google_API_Link = "https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=19855%20Annenberg%20Ashburn&includeOffices=true&levels=country";
   //CHANGE THIS LINK to include your OWN address (aka switch out 40HoneyLocustIrvine for your address)
 
@@ -554,7 +579,13 @@ case "GetCongressTwitter":{
   );
 });
 });
-break;
+}
+catch(err){
+
+      getLocationError(context)
+
+    }
+    break;
 }
 
 
@@ -633,11 +664,11 @@ case "GetCongress":{
       response.on('data', (data) => {
         addressJSON  = JSON.parse(data); //when this is "let" then it results in error
         state = addressJSON.stateOrRegion;
-        city = addressJSON.city +"%20";
+        city = addressJSON.city;
         addressLine1 = addressJSON.addressLine1;
         zipCode = addressJSON.postalCode;
 
-        endpoint2 = "https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=" + addressLine1 +"&includeOffices=true&levels=country";
+        endpoint2 = "https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=" + addressLine1 +"%20"+ city+"&includeOffices=true&levels=country";
 
 
         body = ""
@@ -787,6 +818,7 @@ case "GetUnemploymentRate":{
   }
 
   case "GetNationalDebt":{
+    try{
     var nationalDebtLink = "https://www.treasurydirect.gov/NP_WS/debt/current?format=json"
 
     Https.get(nationalDebtLink, (response) => {
@@ -803,7 +835,10 @@ case "GetUnemploymentRate":{
         )
       })
     })
-
+}
+    catch(err){
+      getLocationError(context)
+    }
     break;
 
   }
@@ -866,13 +901,15 @@ case "GetUnemploymentRate":{
           addressJSON  = JSON.parse(data); //when this is "let" then it results in error
 
           var addressLine1 = addressJSON.addressLine1;
+          var state = addressJSON.stateOrRegion;
+          var city = addressJSON.city ;
           //  var addressLine1 = "40 Honey Locust"
 
           console.log(addressLine1)
 
 
 
-          endpoint2 = "https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=" + addressLine1 +"&includeOffices=true&levels=country";
+          endpoint2 = "https://www.googleapis.com/civicinfo/v2/representatives?key=AIzaSyDZxqzVTlhxpsj5mwg1C2JOblc29YndibA&address=" + addressLine1 +city+state+"&includeOffices=true&levels=country";
 
 
           body = ""
